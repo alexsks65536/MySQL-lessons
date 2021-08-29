@@ -1,0 +1,10 @@
+insert into media_types (id, name) values (1, 'application/mspowerpoint');
+insert into media_types (id, name) values (2, 'image/jpeg');
+insert into media_types (id, name) values (3, 'application/x-mspowerpoint');
+insert into media_types (id, name) values (4, 'image/png');
+insert into media_types (id, name) values (5, 'audio/mpeg3');
+insert into media_types (id, name) values (6, 'application/msword');
+insert into media_types (id, name) values (7, 'video/mpeg');
+insert into media_types (id, name) values (8, 'video/avi');
+insert into media_types (id, name) values (9, 'video/avi');
+insert into media_types (id, name) values (10, 'application/vnd.ms-excel');
