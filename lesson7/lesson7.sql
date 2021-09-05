@@ -1,29 +1,29 @@
 /*
- * 1. Составьте список пользователей users, 
- * которые осуществили хотя бы один заказ orders в интернет магазине.
- */
+ * 1. РЎРѕСЃС‚Р°РІСЊС‚Рµ СЃРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ users, 
+ * РєРѕС‚РѕСЂС‹Рµ РѕСЃСѓС‰РµСЃС‚РІРёР»Рё С…РѕС‚СЏ Р±С‹ РѕРґРёРЅ Р·Р°РєР°Р· orders РІ РёРЅС‚РµСЂРЅРµС‚ РјР°РіР°Р·РёРЅРµ.
+ */ 
 
 SELECT id, name FROM users WHERE id IN (SELECT user_id FROM orders);
 
 /*
- * 2. Выведите список товаров products и разделов catalogs, 
- * который соответствует товару.
+ * 2. Р’С‹РІРµРґРёС‚Рµ СЃРїРёСЃРѕРє С‚РѕРІР°СЂРѕРІ products Рё СЂР°Р·РґРµР»РѕРІ catalogs, 
+ * РєРѕС‚РѕСЂС‹Р№ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ С‚РѕРІР°СЂСѓ.
  */
 
 SELECT id, name, (SELECT name FROM catalogs WHERE id = catalog_id) AS 'catalog' FROM products;
 
 /*
-*(по желанию) Пусть имеется таблица рейсов flights (id, from, to) 
-*и таблица городов cities (label, name). Поля from, to и label 
-*содержат английские названия городов, поле name — русское. 
-*Выведите список рейсов flights с русскими названиями городов.
+*(РїРѕ Р¶РµР»Р°РЅРёСЋ) РџСѓСЃС‚СЊ РёРјРµРµС‚СЃСЏ С‚Р°Р±Р»РёС†Р° СЂРµР№СЃРѕРІ flights (id, from, to) 
+*Рё С‚Р°Р±Р»РёС†Р° РіРѕСЂРѕРґРѕРІ cities (label, name). РџРѕР»СЏ from, to Рё label 
+*СЃРѕРґРµСЂР¶Р°С‚ Р°РЅРіР»РёР№СЃРєРёРµ РЅР°Р·РІР°РЅРёСЏ РіРѕСЂРѕРґРѕРІ, РїРѕР»Рµ name вЂ” СЂСѓСЃСЃРєРѕРµ. 
+*Р’С‹РІРµРґРёС‚Рµ СЃРїРёСЃРѕРє СЂРµР№СЃРѕРІ flights СЃ СЂСѓСЃСЃРєРёРјРё РЅР°Р·РІР°РЅРёСЏРјРё РіРѕСЂРѕРґРѕРІ.
 */
 CREATE DATABASE example;
 
 CREATE TABLE flights(
 id SERIAL PRIMARY KEY,
-fly_from varchar(255) comment 'город вылета',
-fly_to varchar(255) comment 'город прилета'
+fly_from varchar(255) comment 'РіРѕСЂРѕРґ РІС‹Р»РµС‚Р°',
+fly_to varchar(255) comment 'РіРѕСЂРѕРґ РїСЂРёР»РµС‚Р°'
 );
 -- truncate TABLE flights;
 INSERT INTO flights (fly_from, fly_to) VALUES 
@@ -34,16 +34,16 @@ INSERT INTO flights (fly_from, fly_to) VALUES
 
 -- DROP TABLE cities;
 CREATE TABLE cities(
-lable varchar(255) comment 'города по-английски',
-name varchar(255) comment 'города по-русски'
+lable varchar(255) comment 'РіРѕСЂРѕРґР° РїРѕ-Р°РЅРіР»РёР№СЃРєРё',
+name varchar(255) comment 'РіРѕСЂРѕРґР° РїРѕ-СЂСѓСЃСЃРєРё'
 );
 
 INSERT INTO cities (lable, name) VALUES 
-	('St.Peterburg', 'Санкт-Петербург'),
-	('Moscow', 'Москва'),
-	('Vladivostok', 'Владивосток'),
-	('Krasnodar', 'Краснодар'),
-	('Anapa', 'Анапа');
+	('St.Peterburg', 'РЎР°РЅРєС‚-РџРµС‚РµСЂР±СѓСЂРі'),
+	('Moscow', 'РњРѕСЃРєРІР°'),
+	('Vladivostok', 'Р’Р»Р°РґРёРІРѕСЃС‚РѕРє'),
+	('Krasnodar', 'РљСЂР°СЃРЅРѕРґР°СЂ'),
+	('Anapa', 'РђРЅР°РїР°');
 
 SELECT 
 	id, 
