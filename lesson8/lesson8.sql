@@ -14,12 +14,11 @@ LIMIT 1; -- выводим только одно значение
 	
 /*
  * 2. Подсчитать общее количество лайков, которые получили пользователи младше 10 лет.
- */
+ *
 SELECT count(*) AS users_under_10_years_old
 FROM profiles p
 JOIN posts_likes pl ON like_type = 1 AND p.user_id = pl.user_id 
 WHERE (YEAR(current_date())-YEAR(p.birthday)) < '10';
-
 /*
  *3. Определить кто больше поставил лайков (всего): мужчины или женщины.
  */
