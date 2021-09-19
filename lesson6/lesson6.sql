@@ -33,33 +33,14 @@ SELECT COUNT(*) as quantity_over_10 FROM profiles WHERE (YEAR(current_date())-YE
 -- id пользователей, которые младше 10 лет
 SELECT user_id AS user_10 FROM profiles WHERE (YEAR(current_date())-YEAR(birthday)) < '10';
 -- 
-SELECT user_id AS user_10, (SELECT like_type FROM posts_likes WHERE profiles.user_id = user_10 ) FROM profiles WHERE (YEAR(current_date())-YEAR(birthday)) < '10';
--- 
-SELECT user_id AS s, (YEAR(current_date())-YEAR(birthday)) AS age, (SELECT like_type FROM posts_likes WHERE user_id = s) FROM profiles ORDER BY age;
-/* с использованием JOIN */
-SELECT p.user_id, pl.like_type 
+/* с использованием JOIN*/
+
+SELECT count(*) AS users_under_10_years_old
 FROM profiles p
-JOIN posts_likes pl ON pl.like_type = 1
+JOIN posts_likes pl ON like_type = 1 AND p.user_id = pl.user_id 
 WHERE (YEAR(current_date())-YEAR(p.birthday)) < '10';
 
-SELECT count(*) AS total, pl.like_type
-FROM posts_likes pl
-JOIN profiles p ON pl.like_type = 1 AND (YEAR(current_date())-YEAR(p.birthday)) < '10';
 
-SELECT count(*) AS total, pl.like_type
-FROM posts_likes pl
-JOIN profiles p ON pl.like_type = 1
-WHERE (YEAR(current_date())-YEAR(p.birthday)) < '10';
-
-SELECT count(*) AS total
-FROM posts_likes pl
-JOIN profiles p ON (YEAR(current_date())-YEAR(p.birthday)) < '10'
-WHERE pl.like_type = 1;
-
-SELECT count(*) 
-FROM profiles p
-JOIN posts_likes pl ON (YEAR(now())-YEAR(p.birthday)) < '10'
-WHERE pl.like_type = 1;
 /*
  *3. Определить кто больше поставил лайков (всего): мужчины или женщины.
  */
@@ -87,3 +68,20 @@ SELECT like_type, ( -- выбрать из столбцов user_id, like_type
 	AS gender -- название столбца gender
 	FROM posts_likes
 	ORDER BY like_type DESC; -- из таблицы posts_like
+	
+/* с использоваинем JOIN */	
+	
+	SELECT count(*)
+	FROM posts_likes pl
+	JOIN profiles p ON pl.user_id = p.user_id	
+	WHERE pl.like_type = 1 AND (p.gender = 'm' OR p.gender = 'f');
+	
+	SELECT count(*) AS female, (
+		SELECT count(*)
+		FROM posts_likes pl 
+		JOIN profiles p ON pl.user_id = p.user_id AND p.gender = 'm'
+		WHERE pl.like_type = 1
+		)  AS man
+	FROM posts_likes pl
+	JOIN profiles p ON pl.user_id = p.user_id AND p.gender = 'f'
+	WHERE pl.like_type = 1 ;
