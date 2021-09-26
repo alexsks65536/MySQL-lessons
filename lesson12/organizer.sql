@@ -1,28 +1,28 @@
 /*
- * "����������� ����������-����������� ��������� ������������ �����������".
+ * "Электронный органайзер-планировщик поручений руководителя сотрудникам".
  * 
- * ������������ ������� ������ "tasks", ����������� �� � �������� 'projects',
- * ������������� �������������� ����������, ������������� ���� ����������.
- * ��������� �������� ������, ������ ������� � ���������, ����� ���������� ������
- * ������ ������� � ����������, ��� ������������� ����� ����������� � ����������.
- * ���������� ����� ������� � ��������� ��������
- */ 
+ * Руководитель создает задачи "tasks", привязывает их к проектом 'projects',
+ * устанавливает ответственного сотрудника, устанавливает срок выполнения.
+ * Сотрудник получает задачу, ставит отметку о получении, после выполнения задачи
+ * ставит отметку о выполнении, при необходимости пишет комментарий о выполнении.
+ * Сотрудники могут входить в несколько проектов
+ */
 DROP DATABASE IF EXISTS organizer;
 
 CREATE DATABASE IF NOT EXISTS organizer;
 
 USE organizer;
 
--- 1. ������� ������� �����������
--- ���������� ������ ��� ����� � �������
+-- 1. создаем таблицу сотрудников
+-- записываем данные для входа в систему
 
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	email VARCHAR(150) NOT NULL UNIQUE comment 'email ���������� - �� �� ����� ��� �����',
-	password_hash CHAR(65) DEFAULT NULL comment '������ ��� �����',
-	user_status INT NOT NULL comment '������ ���������� � ��� �����'
+	email VARCHAR(150) NOT NULL UNIQUE comment 'email сотрудника - он же логин для входа',
+	password_hash CHAR(65) DEFAULT NULL comment 'пароль для входа',
+	user_status INT NOT NULL comment 'статус сотрудника и его права'
 );
 
 insert into users (id, email, password_hash, user_status) values (1, 'ijaye0@quantcast.com', '9c750f014a38b02f0097687c96fdeee0', 2);
@@ -38,15 +38,15 @@ insert into users (id, email, password_hash, user_status) values (10, 'astutt9@n
 
 SELECT * FROM users;
 
--- 2. ������� ������� �������� �����������,
--- ������� ���, �������, ���� ��������
+-- 2. создаем таблицу профилей сотрудников,
+-- заносим имя, фамилию, день рождения
 
 DROP TABLE IF EXISTS profiles;
 
 CREATE TABLE profiles (
 	id_profiles BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	first_name VARCHAR(255) comment '��� ����������',
-	last_name VARCHAR(255) comment '������� ����������',
+	first_name VARCHAR(255) comment 'имя сотрудника',
+	last_name VARCHAR(255) comment 'фамилия сотрудника',
 	birthday date NOT NULL,
 	FOREIGN KEY(id_profiles) REFERENCES users(id)
 );
@@ -62,7 +62,7 @@ insert into profiles (id_profiles, first_name, last_name, birthday) values (8, '
 insert into profiles (id_profiles, first_name, last_name, birthday) values (9, 'Jimmie', 'Goodday', '1994-11-01 07:53:49');
 insert into profiles (id_profiles, first_name, last_name, birthday) values (10, 'Constantine', 'Felkin', '1987-10-26 18:53:46');
 
--- ������� ����������� ������ � �� ���������
+-- выберем сотрудников вместе с их профилями
 
 SELECT p.id_profiles, 
 concat(p.first_name, ' ', p.last_name) AS user_name, 
@@ -70,99 +70,99 @@ p.birthday, u.email
 FROM profiles p
 	LEFT JOIN users u ON id = id_profiles;
 
--- 3. C������ ������� �����
--- ������ ������ ������������ � ��������� �� �����������, ������ ����� ����������
+-- 3. Cоздаем таблицу задач
+-- Задачи ставит руководитель и назначает их сотрудникам, ставит сроки выполнения
 
 DROP TABLE IF EXISTS tasks;
 
 CREATE TABLE tasks (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	task VARCHAR(255) comment '���������� ������',
-	create_date DATETIME ON UPDATE current_timestamp comment '���� �������� ������',
-	end_date DATE NOT NULL comment '���� �������� ����� ���������� ������',
-	important  BIGINT UNSIGNED NOT NULL comment '�������� ������'
+	task VARCHAR(255) comment 'содержание задачи',
+	create_date DATETIME ON UPDATE current_timestamp comment 'дата создания задачи',
+	end_date DATE NOT NULL comment 'дата крайнего срока выполнения задачи',
+	important  BIGINT UNSIGNED NOT NULL comment 'важность задачи'
 	);
 
 truncate TABLE tasks;
 
-insert into tasks (id, task, create_date, end_date, important) values (1, '����������� ����� ������ �������� � ��� "���������������" � ������ ����������� �������.', '2021-07-11 08:09:44', '2021-07-19 08:09:44', 1);
-insert into tasks (id, task, create_date, end_date, important) values (2, '���������� ������ ��������� ���������� ����� �� ����� ����.', '2021-09-16 18:17:37', '2021-10-11 18:17:37', 1);
-insert into tasks (id, task, create_date, end_date, important) values (3, '�������� ������� �� ������� ������� �������� ��������� � ��������� "�������".', '2021-07-29 05:13:10', '2021-08-15 05:13:10', 2);
-insert into tasks (id, task, create_date, end_date, important) values (4, '��������� ������� � ������������� �������� ������� ��� ��������� �� ����� ��� �� 15 �����.', '2021-07-16 04:36:32', '2021-08-16 04:36:32', 4);
-insert into tasks (id, task, create_date, end_date, important) values (5, '�������� � ������� ������� �������� ����� ������� ��� ������� ����� �����������.', '2021-08-29 09:56:23', '2021-09-19 09:56:23', 1);
-insert into tasks (id, task, create_date, end_date, important) values (6, '��������� �������� ������ � ������� �����.', '2021-07-14 09:40:13', '2021-08-19 09:40:13', 4);
-insert into tasks (id, task, create_date, end_date, important) values (7, '����������� ��������� �� ����� ������� �� ��� �������� ����������.', '2021-07-30 14:39:21', '2021-08-17 14:39:21', 2);
-insert into tasks (id, task, create_date, end_date, important) values (8, '����������� ������� �������� ������������ �� ���������������� ��������.', '2021-08-03 14:10:26', '2021-09-01 14:10:26', 1);
-insert into tasks (id, task, create_date, end_date, important) values (9, '������������ ����� �� ����������� ��������� �������� ������������ �� ������ ��������.', '2021-08-15 21:18:19', '2021-09-05 21:18:19', 2);
-insert into tasks (id, task, create_date, end_date, important) values (10, '�������� �������, ��������� � ��������� ��� �� �������� ������������ ����������.', '2021-09-03 20:02:44', '2021-10-03 20:02:44', 1);
+insert into tasks (id, task, create_date, end_date, important) values (1, 'Подготовить новый проект договора с ООО "СтройИнжиниринг" с учетом финансового лизинга.', '2021-07-11 08:09:44', '2021-07-19 08:09:44', 1);
+insert into tasks (id, task, create_date, end_date, important) values (2, 'Произвести расчет расходной постоянной части до конца года.', '2021-09-16 18:17:37', '2021-10-11 18:17:37', 1);
+insert into tasks (id, task, create_date, end_date, important) values (3, 'Принятие решения по вопросу доступа линейных механиков к программе "Глонасс".', '2021-07-29 05:13:10', '2021-08-15 05:13:10', 2);
+insert into tasks (id, task, create_date, end_date, important) values (4, 'Доведение приказа о необходимости глушения техники при остановке ее более чем на 15 минут.', '2021-07-16 04:36:32', '2021-08-16 04:36:32', 4);
+insert into tasks (id, task, create_date, end_date, important) values (5, 'Проверка и наличие ведения журналов учета расхода ГСМ следств малой механизации.', '2021-08-29 09:56:23', '2021-09-19 09:56:23', 1);
+insert into tasks (id, task, create_date, end_date, important) values (6, 'Исключить внесение правок в путевые листы.', '2021-07-14 09:40:13', '2021-08-19 09:40:13', 4);
+insert into tasks (id, task, create_date, end_date, important) values (7, 'Подготовить положение по сдаче отчетов по ГСМ линеными механиками.', '2021-07-30 14:39:21', '2021-08-17 14:39:21', 2);
+insert into tasks (id, task, create_date, end_date, important) values (8, 'Разработать систему утренних инструктажей на производственных участках.', '2021-08-03 14:10:26', '2021-09-01 14:10:26', 1);
+insert into tasks (id, task, create_date, end_date, important) values (9, 'Предоставить отчет по кадастровой стоимости объектов недвижимости по группе компаний.', '2021-08-15 21:18:19', '2021-09-05 21:18:19', 2);
+insert into tasks (id, task, create_date, end_date, important) values (10, 'Пересчет убытков, связанных с повышеним цен по объектам министерства транспорта.', '2021-09-03 20:02:44', '2021-10-03 20:02:44', 1);
 
--- ������� ������ �����, ���� ��������, ���� ���������� � �� ��������
+-- выведем список задач, дату создания, срок выполнения и ее важность
 
 SELECT * FROM tasks;
 
 
--- 4. �������� ������� � �������� �������� �������� �����
+-- 4. создадим таблицу с перечнем градаций важности задач
 
 DROP TABLE IF EXISTS important_tasks;
 
 CREATE TABLE important_tasks (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	important VARCHAR(255) comment '�������� ������'
+	important VARCHAR(255) comment 'важность задачи'
 );
 
 INSERT INTO important_tasks VALUES
-	(NULL, '�����'),
-	(NULL, '������'),
-	(NULL, '��������'),
-	(NULL, '������������'),
-	(NULL, '�����������'),
-	(NULL, '���������'),
-	(NULL, '���������������');
+	(NULL, 'важно'),
+	(NULL, 'срочно'),
+	(NULL, 'критично'),
+	(NULL, 'среднесрочно'),
+	(NULL, 'долгосрочно'),
+	(NULL, 'обморочно'),
+	(NULL, 'безотлагательно');
 
 
--- ������� ������ �����, ���� ��������, ���� ���������� � �� ��������
+-- выведем список задач, дату создания, срок выполнения и ее важность
 
 SELECT t.id, t.task, t.create_date, t.end_date, it.important FROM tasks t
 LEFT JOIN important_tasks it ON t.important = it.id;
 
--- 5. ������� ������� ��������, ������������ ���������� ������� �� ������������
--- ���� ��������� ����� ������� � ��������� ��������
+-- 5. создаем таблицу проектов, руководитель закрепляет проекты за сотрудниками
+-- один сотрудник может входить в несколько проектов
 
 DROP TABLE IF EXISTS projects;
 
 CREATE TABLE projects (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	project VARCHAR(255) comment '�������� �������'
+	project VARCHAR(255) comment 'описание проекта'
 	);
 
 INSERT INTO projects VALUES
-	(NULL, '������� ��������������'),
-	(NULL, '������ �����'),
-	(NULL, '�����'),
-	(NULL, '����������� �����'),
-	(NULL, '�����'),
-	(NULL, '�����������'),
-	(NULL, '��������'),
-	(NULL, '��������'),
-	(NULL, '���������������'),
-	(NULL, '������������'),
-	(NULL, '�������');
+	(NULL, 'Объекты финансирования'),
+	(NULL, 'Охрана труда'),
+	(NULL, 'Торги'),
+	(NULL, 'Юридический отдел'),
+	(NULL, 'Кадры'),
+	(NULL, 'Лаборатория'),
+	(NULL, 'Механики'),
+	(NULL, 'Экология'),
+	(NULL, 'Ветроэнергетика'),
+	(NULL, 'Безопасность'),
+	(NULL, 'Финансы');
 
 SELECT * FROM projects p;
 
--- 6. ������� ������� ���������� �����
--- ����� ��������� ���������� � ���������� ������������ ������
+-- 6. Создаем таблицу выполнения задач
+-- здесь заносится информация о выполнении поставленной задачи
 
 DROP TABLE IF EXISTS complete_tasks;
 
 CREATE TABLE complete_tasks (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	id_task BIGINT comment '����� ������',
-	id_user BIGINT comment '����� ���������� ���� ��������� ������',
-	complete_date DATE NOT NULL comment '���� ���������� ������',
-	remove_date DATE comment '���� �������� ���������� ������',
-	check_tasks INT NOT NULL comment '������� � ���������� ������',
-	id_task_status VARCHAR(255) comment '���������� � ���������� ������'
+	id_task BIGINT comment 'номер задачи',
+	id_user BIGINT comment 'номер сотрудника кому назначена задача',
+	complete_date DATE NOT NULL comment 'дата выполнения задачи',
+	remove_date DATE comment 'дата переноса выполнения задачи',
+	check_tasks INT NOT NULL comment 'отметка о выполнении задачи',
+	id_task_status VARCHAR(255) comment 'примечание о выполнении задачи'
 );
 
 insert into complete_tasks (id, id_task, id_user, complete_date, remove_date, check_tasks, id_task_status) values (1, 1, 1, '2021-12-16 11:49:56', null, 1, 2);
@@ -176,8 +176,8 @@ insert into complete_tasks (id, id_task, id_user, complete_date, remove_date, ch
 insert into complete_tasks (id, id_task, id_user, complete_date, remove_date, check_tasks, id_task_status) values (9, 3, 8, '2021-12-13 17:58:18', null, 6, 1);
 insert into complete_tasks (id, id_task, id_user, complete_date, remove_date, check_tasks, id_task_status) values (10, 8, 2, '2021-10-07 00:15:03', null, 6, 1);
 
--- ������� ������ � ������� ������ �������� ������, ���� �������� ����� ���������� ������,
--- ���� ������������ ���������� � ������� ���� ���
+-- выведем запрос в который входит название задачи, дата крайнего срока выполнения задачи,
+-- дата фактического выполнения и разница этих дат
 
 SELECT ct.id, t.task, t.end_date, ct.complete_date, 
 	DATEDIFF(ct.complete_date, t.end_date) AS period_execution
@@ -185,37 +185,37 @@ SELECT ct.id, t.task, t.end_date, ct.complete_date,
 JOIN tasks t ON ct.id_task = t.id
 ;
 
--- 7. ������� ������� �������� ���������� �����
+-- 7. Создаем таблицу статусов выполнения задач
 
 DROP TABLE IF EXISTS status_tasks;
 
 CREATE TABLE status_tasks (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	task_status VARCHAR(255) comment '������ ���������� ������'
+	task_status VARCHAR(255) comment 'статус выполнения задачи'
 );
 
--- �������� ������������ ����������
+-- заполним необходимыми значениями
 
 INSERT INTO status_tasks VALUES 
-		(NULL, '�� ��������'),
-		(NULL, '� ������'),
-		(NULL, '��������'),
-		(NULL, '��������'),
-		(NULL, '���������'),
-		(NULL, '�� ���������'),
-		(NULL, '���������'),
-		(NULL, '������ � �����');
+		(NULL, 'не началось'),
+		(NULL, 'в работе'),
+		(NULL, 'отложено'),
+		(NULL, 'отменено'),
+		(NULL, 'завершено'),
+		(NULL, 'на доработку'),
+		(NULL, 'отклонено'),
+		(NULL, 'готово к сдаче');
 	
 	SELECT * FROM status_tasks st ;
 	
--- 8. C������� ������� � ������� ����� �������� �������� ������������� � ������� (��������)
+-- 8. Cоздадим таблицу в которой будем отмечать привязку пользователей к проекту (проектам)
 	
 	DROP TABLE IF EXISTS user_project;
 	
 CREATE TABLE user_project (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	project_id BIGINT comment '����� �������',
-	user_id BIGINT comment '����� ����������'
+	project_id BIGINT comment 'номер проекта',
+	user_id BIGINT comment 'номер сотрудника'
 	);
 
 insert into user_project (id, project_id, user_id) values (1, 9, 6);
@@ -269,7 +269,7 @@ insert into user_project (id, project_id, user_id) values (48, 9, 4);
 insert into user_project (id, project_id, user_id) values (49, 6, 5);
 insert into user_project (id, project_id, user_id) values (50, 9, 9);
 
--- ������� ������ �������������, ������� ������ � �������
+-- выведем список пользователей, которые входят в проекты
 
 SELECT concat(p2.first_name, ' ', p2.last_name) AS username , p.project FROM user_project up
 	JOIN projects p ON up.project_id = p.id 
@@ -277,9 +277,9 @@ SELECT concat(p2.first_name, ' ', p2.last_name) AS username , p.project FROM use
 ;
 
 /*
- * 9. �������� ������� ��� �������� ����� ����� ������, ������� ����� �����������.
- * � �������-�������� ������ �������� ������ ���� � ��������, � ������ ������ ���� ����
- * �����-����� � �������� �����-�����.
+ * 9. Создадим таблицу для хранения типов медиа файлов, каталог типов медиафайлов.
+ * В таблице-каталоге обычно хранятся только айди и название, в данном случае айди типа
+ * медиа-файла и название медиа-файла.
  */
 
 CREATE TABLE media_types(
@@ -287,14 +287,14 @@ CREATE TABLE media_types(
 	name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- ������� ���� � �������
-INSERT INTO media_types VALUES (DEFAULT, '�������� PDF');
-INSERT INTO media_types VALUES (DEFAULT, '����������');
-INSERT INTO media_types VALUES (DEFAULT, '�������� MS Office');
+-- Добавим типы в каталог
+INSERT INTO media_types VALUES (DEFAULT, 'документ PDF');
+INSERT INTO media_types VALUES (DEFAULT, 'фотография');
+INSERT INTO media_types VALUES (DEFAULT, 'документ MS Office');
 
 SELECT * FROM media_types;
 
--- 10. C������� �������, � ������� ����� ��������� ����� � ������ �������������
+-- 10. Cоздадим таблицу, в которой будут храниться файлы и ссылки пользователей
 
 DROP TABLE IF EXISTS user_files;
 
@@ -322,7 +322,7 @@ insert into user_files (id, user_id, media_types_id, file_name, file_size, creat
 insert into user_files (id, user_id, media_types_id, file_name, file_size, created_at) values (9, 3, 2, 'file6', 36, '2021-07-10 04:29:59');
 insert into user_files (id, user_id, media_types_id, file_name, file_size, created_at) values (10, 2, 3, 'file6', 19, '2020-11-08 02:05:00');
 
--- ������� ������ ������ � �� ����������� � ��������� � �����������
+-- выведем список файлов с их параметрами и привязкой к сотрудникам
 
 SELECT uf.file_name, mt.name, uf.file_size, uf.created_at, concat(p.first_name, ' ', p.last_name) AS username  FROM user_files uf
 	JOIN profiles p ON p.id_profiles = uf.user_id
@@ -331,8 +331,8 @@ SELECT uf.file_name, mt.name, uf.file_size, uf.created_at, concat(p.first_name, 
 
 /****************************************************************************************************/
 
-/* 1. �������� ������������� ������������, ����� �����������
- * �������� ������
+/* 1. Создадим представление показывающее, каким сотрудникам
+ * назначен проект
 */
 
 CREATE VIEW user_project_in AS 
@@ -340,8 +340,8 @@ SELECT concat(p2.first_name, ' ', p2.last_name) AS username , p.project FROM use
 	JOIN projects p ON up.project_id = p.id 
 	JOIN profiles p2 ON up.user_id = p2.id_profiles;
 	
-/* 2. �������� �������������, ������������ ������ �����, 
-* ���� ��������, ���� ���������� � �� ��������
+/* 2. Создадим представление, показывающее список задач, 
+* дату создания, срок выполнения и ее важность
 */
 	
 CREATE VIEW task_works_users AS
@@ -349,7 +349,7 @@ SELECT t.id, t.task, t.create_date, t.end_date, it.important FROM tasks t
 LEFT JOIN important_tasks it ON t.important = it.id;
 
 /******************************************************************************************************/
--- �������� ��������� ���������� ������
+-- создадим процедуру получающую задачи
 
 USE organizer;
 GO 
